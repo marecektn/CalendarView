@@ -63,6 +63,8 @@ extension CalendarView {
         public var weekdaysTextColor              = UIColor.gray
         public var weekdaysBackgroundColor        = UIColor.white
         public var weekdaysFont                   = UIFont.systemFont(ofSize: 14) // Used for days of the week
+        public var headerAlignment                = NSTextAlignment.left
+        public var headerIndentation              = 0.0
         
         //Common
         public var cellShape                 = CellShapeOptions.bevel(4.0)

@@ -58,7 +58,7 @@ open class CalendarHeaderView: UIView {
     }
     
     public func updateStyle() {
-        self.monthLabel.textAlignment = NSTextAlignment.center
+        self.monthLabel.textAlignment = style.headerAlignment
         self.monthLabel.font = style.headerFont
         self.monthLabel.textColor = style.headerTextColor
         self.monthLabel.backgroundColor = style.headerBackgroundColor
@@ -100,9 +100,9 @@ open class CalendarHeaderView: UIView {
         }
         
         self.monthLabel?.frame = CGRect(
-            x: 0.0,
+            x: 0.0 + CGFloat(style.headerIndentation),
             y: style.headerTopMargin,
-            width: self.bounds.size.width,
+            width: self.bounds.size.width + CGFloat(style.headerIndentation),
             height: self.bounds.size.height
                 - style.headerTopMargin
                 - style.weekdaysHeight
