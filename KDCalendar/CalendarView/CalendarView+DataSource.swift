@@ -73,6 +73,9 @@ extension CalendarView: UICollectionViewDataSource {
             var lastDayOfEndMonthComponents = self.calendar.dateComponents([.era, .year, .month], from: self.endDateCache)
             let range = self.calendar.range(of: .day, in: .month, for: self.endDateCache)!
             lastDayOfEndMonthComponents.day = range.count
+            lastDayOfEndMonthComponents.hour = 23
+            lastDayOfEndMonthComponents.minute = 59
+            lastDayOfEndMonthComponents.second = 59
             
             _lastDayCache = self.calendar.date(from: lastDayOfEndMonthComponents)!
         }
