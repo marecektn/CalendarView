@@ -153,31 +153,28 @@ extension CalendarView: UICollectionViewDataSource {
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let dayCell = collectionView.dequeueReusableCell(withReuseIdentifier: cellReuseIdentifier, for: indexPath) as! CalendarDayCell
         
-        dayCell.style = style
-        dayCell.clearStyles()
-        
         dayCell.transform = _isRtl
             ? CGAffineTransform(scaleX: -1.0, y: 1.0)
             : CGAffineTransform.identity
         
-        guard let (firstDayIndex, numberOfDaysTotal) = self.getCachedSectionInfo(indexPath.section) else { return dayCell }
+        // hack: send once at the beginning
+        if indexPath.section == 0 && indexPath.item == 0 {
+            self.scrollViewDidEndDecelerating(collectionView)
+        }
+        
+        return dayCell
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let dayCell = cell as? CalendarDayCell else { return }
+        
+        dayCell.style = style
+        dayCell.clearStyles()
+        
+        guard let (firstDayIndex, numberOfDaysTotal) = self.getCachedSectionInfo(indexPath.section) else { return }
         
         let lastDayIndex = firstDayIndex + numberOfDaysTotal
-        
-        let cellOutOfRange = { (indexPath: IndexPath) -> Bool in
-            
-            var isOutOfRange = false
-            
-            if self.startIndexPath.section == indexPath.section { // is 0
-                isOutOfRange = self.startIndexPath.item + firstDayIndex > indexPath.item
-            }
-            if self.endIndexPath.section == indexPath.section && !isOutOfRange {
-                isOutOfRange = self.endIndexPath.item + firstDayIndex < indexPath.item
-            }
-            
-            return isOutOfRange
-            
-        }
+        let cellOutOfRange = self.isCellOutOfRange(cellIndexPath: indexPath, startIndexPath: startIndexPath, endIndexPath: endIndexPath, firstDayIndex: firstDayIndex)
         
         let isInRange = (firstDayIndex..<lastDayIndex).contains(indexPath.item)
         let isAdjacent = !isInRange && style.showAdjacentDays && (
@@ -207,19 +204,12 @@ extension CalendarView: UICollectionViewDataSource {
             }
             
             dayCell.isAdjacent = isAdjacent
-            dayCell.isOutOfRange = cellOutOfRange(indexPath)
+            dayCell.isOutOfRange = cellOutOfRange
             
         } else {
             dayCell.isHidden = true
             dayCell.textLabel.text = ""
         }
-        
-        // hack: send once at the beginning
-        if indexPath.section == 0 && indexPath.item == 0 {
-            self.scrollViewDidEndDecelerating(collectionView)
-        }
-        
-        guard !dayCell.isOutOfRange else { return dayCell }
         
         // if is in range continue with additional styling
         
@@ -236,9 +226,19 @@ extension CalendarView: UICollectionViewDataSource {
         }
         
         dayCell.eventsCount = self.eventsByIndexPath[indexPath]?.count ?? 0
+    }
+    
+    private func isCellOutOfRange(cellIndexPath: IndexPath, startIndexPath: IndexPath, endIndexPath: IndexPath, firstDayIndex: Int) -> Bool {
+        var isOutOfRange = false
         
-        return dayCell
+        if startIndexPath.section == cellIndexPath.section { // is 0
+            isOutOfRange = startIndexPath.item + firstDayIndex > cellIndexPath.item
+        }
+        if endIndexPath.section == cellIndexPath.section && !isOutOfRange {
+            isOutOfRange = endIndexPath.item + firstDayIndex < cellIndexPath.item
+        }
+        
+        return isOutOfRange
     }
 }
-
 
